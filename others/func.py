@@ -1,3 +1,4 @@
+'''
 import json
 import time
 import datetime
@@ -23,3 +24,4 @@ def json_saves(current_activities):
     with open("pipiski.json", "w", encoding = "utf-8") as f:
         cur_active = json.dump(current_activities, f, ensure_ascii= False)
     return f"файл успешно создан {cur_active}"
+'''

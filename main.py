@@ -1,49 +1,80 @@
-from tkinter import *
-from watch import StopWatch
-from dbb import DataBase
+from tkinter import  Tk, Entry, Button, StringVar
+from timerwidget import TimerWidget
+from session_manager import SessionManager
+from storage import JsonStorage
+from models import Activity
+import datetime
 
-def main():
+class App:
+    def __init__(self):
 
-    root = Tk()
-    root.title('Timer')
-    root.geometry('500x500')
-    sw = StopWatch(root)
-    sw.place(x = 200, y = 100)
-    db = DataBase(sw)
+        self.root = Tk()
+        self.root.title("Трекер Активности")
+        self.root.geometry("500x500")
 
-    entry_activity = Entry(width=50)
-    entry_activity.place(x=100, y=200)
+        self.session_manager = SessionManager()
+        self.storage = JsonStorage()
 
-    def func():
-        db.show_start(sw.Start())
-        #print(sw.Start())
-    start = Button(text='Начать', width=20, command = func)
-    start.place(x=100, y=220)
+        self.timer_widget = TimerWidget(self.root)
+        self.timer_widget.place(x = 150 , y = 50)
+
+        self.activity_name_var = StringVar()
+        self.name_entry =  Entry(self.root, textvariable=self.activity_name_var, width = 40)
+        self.name_entry.place(x = 100, y = 200)
+        self.name_entry.insert(0, "Введите название активности")
+
+        self.save_button = Button(self.root, text = "Сохранить активность",
+                                  command = self.save_activity, width= 25)
+        self.save_button.place(x = 150, y = 230)
+
+        self.current_session_start = None
+
+        self.timer_widget.start_button.config(command = self.on_start_clicked)
+        self.timer_widget.stop_button.config(command = self.on_stop_clicked)
+
+    def on_start_clicked(self):
+        # вызывается при нажатии старт
+        self.current_session_start = self.timer_widget.start_timer()
+        print(f"Логгирование  - self.current_session_start - {self.current_session_start} -- on_start_clicked")
+
+    def on_stop_clicked(self):
+        # вызывается при нажатии стоп
+        self.timer_widget.stop_timer()
+
+    def save_activity(self):
+        print(f"Логгирование - self.current_session_start - {self.current_session_start} --save_activity")
+
+        if self.current_session_start is None:
+            print("Ошибка! Сначала запустите таймер")
+            return
+
+        name = self.activity_name_var.get()
+        if not name or name == "Введите название активности":
+            print("Ошибка! Введите название активности.")
+            return
+
+        end_time = datetime.datetime.now()
+
+        new_activity = Activity(name = name,
+                                start = self.current_session_start,
+                                end = end_time)
+
+        self.session_manager.add_session(new_activity)
+        self.storage.save_all(self.session_manager.sessions)
+
+        print(f"Актисвность {name} сохранена")
+        print(f"Начало: {self.current_session_start}")
+        print(f"Окончание: {end_time}")
+        print(f"Продолжительность: {new_activity.duration}")
+
+        self.current_session_start = None
+        self.activity_name_var.set("")
+
+    def run (self):
+        self.root.mainloop()
 
 
-    def func1():
-        db.show_stop(sw.Stop())
+if __name__ == "__main__":
+    app = App()
+    app.run()
 
-    stop = Button(text='Завершить', width=20, command = func1)
-    stop.place(x=255, y=220)
-
-    reset = Button(text='Сбросить', width=20, command = sw.Reset)
-    reset.place(x=100, y=245)
-
-    quit_btn = Button(root, text='Выход', width=20, command = root.quit)
-    quit_btn.place(x = 255, y = 245)
-
-    def save_func():
-        cur_act = db.data(db.show_message(entry_activity),sw.date_begin, sw.date_break)
-        db.json_saves(cur_act)
-    save = Button(root, text='Сохранить', width=20, command=save_func)
-    save.place(x=255, y=275)
-
-    root.mainloop()
-
-
-
-
-
-if __name__ == '__main__':
-    main()
