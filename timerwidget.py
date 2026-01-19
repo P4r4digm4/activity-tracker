@@ -41,7 +41,7 @@ class TimerWidget(Frame):
             hours = int(current_sec //3600)
             minutes = int((current_sec % 3600) // 60)
             seconds = int(current_sec % 60)
-            self.time_label.config(text = f"{hours:02d}:{minutes:02d}:{seconds:02d})")
+            self.time_label.config(text = f"{hours:02d}:{minutes:02d}:{seconds:02d}")
 
         self.after(100, self.update_display)
 

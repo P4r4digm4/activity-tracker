@@ -9,7 +9,7 @@ class Activity:
         self.duration = end - start
 
     def to_dict(self):
-        return{
+        return {
             "name": self.name,
             "start": self.start.isoformat(),
             "end": self.end.isoformat(),

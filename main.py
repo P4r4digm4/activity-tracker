@@ -32,16 +32,35 @@ class App:
         self.timer_widget.start_button.config(command = self.on_start_clicked)
         self.timer_widget.stop_button.config(command = self.on_stop_clicked)
 
+        self.end_time = None
+
     def on_start_clicked(self):
         # вызывается при нажатии старт
+        '''
+                Работа старта: функция timer.widget.start_timer() вызывает функцию StopWatch.start()
+                StopWatch.start() - флагу в классе StopWatch(SW) - присваевается значение True
+                присваевает и возвращает в переменной результат функции datatime.datatime.now()
+                timer.widget.start_timer() возвращает значение из SW.start
+        '''
+
         self.current_session_start = self.timer_widget.start_timer()
         print(f"Логгирование  - self.current_session_start - {self.current_session_start} -- on_start_clicked")
 
     def on_stop_clicked(self):
         # вызывается при нажатии стоп
-        self.timer_widget.stop_timer()
+        '''
+                timer_widget.stop_timer() возвращает время окончания.
+                Вызывает SW.stop, то же самое что и sw.start - но наоборот
+        '''
+        self.end_time = self.timer_widget.stop_timer()
 
     def save_activity(self):
+
+        '''
+                Сохраняет активность путем создания экземпляра класса Activity
+                (отвечает за структуру данных)
+        '''
+
         print(f"Логгирование - self.current_session_start - {self.current_session_start} --save_activity")
 
         if self.current_session_start is None:
@@ -53,19 +72,23 @@ class App:
             print("Ошибка! Введите название активности.")
             return
 
-        end_time = datetime.datetime.now()
+        # Проверка на то была ли нажата кнопка "стоп". Раньше из за этого при нажатой кнопке стоп, и
+        # при нажатии спустя время "сохранить активность", сохранялось текущее время, а не время нажатия кнопки
+        # "стоп"
+        if self.end_time == None:
+            self.end_time = self.timer_widget.stop_timer()
 
         new_activity = Activity(name = name,
                                 start = self.current_session_start,
-                                end = end_time)
+                                end = self.end_time)
 
         self.session_manager.add_session(new_activity)
         self.storage.save_all(self.session_manager.sessions)
 
-        print(f"Актисвность {name} сохранена")
+        print(f"Активность {name} сохранена")
         print(f"Начало: {self.current_session_start}")
-        print(f"Окончание: {end_time}")
-        print(f"Продолжительность: {new_activity.duration}")
+        print(f"Окончание: {self.end_time}")
+        print(f"Продолжительность: ------------------- {new_activity.duration}")
 
         self.current_session_start = None
         self.activity_name_var.set("")
