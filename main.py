@@ -1,9 +1,9 @@
-from tkinter import  Tk, Entry, Button, StringVar
+from tkinter import  Tk, Button, StringVar, ttk
 from timerwidget import TimerWidget
 from session_manager import SessionManager
 from storage import JsonStorage
 from models import Activity
-import datetime
+
 
 class App:
     def __init__(self):
@@ -18,14 +18,23 @@ class App:
         self.timer_widget = TimerWidget(self.root)
         self.timer_widget.place(x = 150 , y = 50)
 
+
+        #здесь строка ввода названия активности как я понял была
+        # self.activity_name_var = StringVar()
+        # self.name_entry =  Entry(self.root, textvariable=self.activity_name_var, width = 40)
+        # self.name_entry.place(x = 100, y = 200)
+        # self.name_entry.insert(0, "Введите название активности")
+
+        #self.history = self.view_history()
+
         self.activity_name_var = StringVar()
-        self.name_entry =  Entry(self.root, textvariable=self.activity_name_var, width = 40)
-        self.name_entry.place(x = 100, y = 200)
-        self.name_entry.insert(0, "Введите название активности")
+        self.combo = ttk.Combobox(self.root, values = self.view_history(), width=37, textvariable=self.activity_name_var)
+        self.combo.set("Введите название активности")
+        self.combo.place(x = 100, y = 200)
 
         self.save_button = Button(self.root, text = "Сохранить активность",
-                                  command = self.save_activity, width= 25)
-        self.save_button.place(x = 150, y = 230)
+                                  command = self.save_activity, width= 33)
+        self.save_button.place(x = 100, y = 225)
 
         self.current_session_start = None
 
@@ -34,12 +43,36 @@ class App:
 
         self.end_time = None
 
+
+        self.view_history_button = Button(self.root, text = 'Посмотреть историю',
+                                         command = self.view_history, width=33)
+        self.view_history_button.place(x = 100, y = 250)
+
+
+    def load_history(self):
+        ''' Загружает историю в session_manager'''
+        history_data = self.storage.load_all()
+        for item in history_data:
+            activity  = Activity.from_dict(item)
+            self.session_manager.add_session(activity)
+
+    def view_history(self):
+        '''Показывает историю для выпадающего списка.'''
+        history = self.storage.load_all()
+        name_session = []
+        for i in range (len(history)):
+           name_session.append(history[i]['name'])
+        return name_session
+
     def on_start_clicked(self):
         # вызывается при нажатии старт
         '''
-                Работа старта: функция timer.widget.start_timer() вызывает функцию StopWatch.start()
-                StopWatch.start() - флагу в классе StopWatch(SW) - присваевается значение True
-                присваевает и возвращает в переменной результат функции datatime.datatime.now()
+                Работа старта: функция timer.widget.start_timer() вызывает функцию
+                StopWatch.start()
+                StopWatch.start() - флагу в классе StopWatch(SW) - присваивается
+                значение True
+                присваивает и возвращает в переменной результат функции
+                datatime.datatime.now()
                 timer.widget.start_timer() возвращает значение из SW.start
         '''
 
@@ -53,6 +86,8 @@ class App:
                 Вызывает SW.stop, то же самое что и sw.start - но наоборот
         '''
         self.end_time = self.timer_widget.stop_timer()
+
+
 
     def save_activity(self):
 
@@ -92,6 +127,7 @@ class App:
 
         self.current_session_start = None
         self.activity_name_var.set("")
+
 
     def run (self):
         self.root.mainloop()

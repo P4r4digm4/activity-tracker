@@ -8,6 +8,18 @@ class Activity:
 
         self.duration = end - start
 
+
+    @classmethod
+    def from_dict(cls, data: dict):
+
+        '''
+                с помощью fromisoformat() мы обратно превращаем наши данные в datetime.datetime,
+                а затем присваиваем значения с новым типом, старым переменным.
+
+        '''
+        start = datetime.datetime.fromisoformat(data['start'])
+        end = datetime.datetime.fromisoformat(data['end'])
+        return cls(name = data['name'], start = start, end = end)
     def to_dict(self):
         return {
             "name": self.name,
