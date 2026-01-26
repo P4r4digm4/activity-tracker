@@ -27,6 +27,9 @@ class App:
 
         #self.history = self.view_history()
 
+
+        self.load_history()
+
         self.activity_name_var = StringVar()
         self.combo = ttk.Combobox(self.root, values = self.view_history(), width=37, textvariable=self.activity_name_var)
         self.combo.set("Введите название активности")
