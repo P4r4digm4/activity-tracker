@@ -15,6 +15,8 @@ class App:
         self.session_manager = SessionManager()
         self.storage = JsonStorage()
 
+        self.total_elapsed_seconds = None
+
         self.timer_widget = TimerWidget(self.root)
         self.timer_widget.place(x = 150 , y = 50)
 
@@ -79,7 +81,13 @@ class App:
                 timer.widget.start_timer() возвращает значение из SW.start
         '''
 
+
+
+
         self.current_session_start = self.timer_widget.start_timer()
+
+        self.end_time = None
+        self.total_elapsed_seconds = None
         print(f"Логгирование  - self.current_session_start - {self.current_session_start} -- on_start_clicked")
 
     def on_stop_clicked(self):
@@ -88,8 +96,8 @@ class App:
                 timer_widget.stop_timer() возвращает время окончания.
                 Вызывает SW.stop, то же самое что и sw.start - но наоборот
         '''
-        self.end_time = self.timer_widget.stop_timer()
-
+        self.end_time, self.total_elapsed_seconds = self.timer_widget.stop_timer()
+        print(f"Логгирование - total_elapsed: {self.total_elapsed_seconds}, on stop clicked.")
 
 
     def save_activity(self):
@@ -110,15 +118,21 @@ class App:
             print("Ошибка! Введите название активности.")
             return
 
+        # if self.total_elapsed_seconds is None:
+        #     print("Ошибка: не найдено время работы!")
+        #     return
+
         # Проверка на то была ли нажата кнопка "стоп". Раньше из за этого при нажатой кнопке стоп, и
         # при нажатии спустя время "сохранить активность", сохранялось текущее время, а не время нажатия кнопки
         # "стоп"
-        if self.end_time == None:
-            self.end_time = self.timer_widget.stop_timer()
+        if self.end_time is None or self.total_elapsed_seconds is None:
+            self.end_time, self.total_elapsed_seconds = self.timer_widget.stop_timer()
+
 
         new_activity = Activity(name = name,
                                 start = self.current_session_start,
-                                end = self.end_time)
+                                end = self.end_time,
+                                duration_seconds= self.total_elapsed_seconds)
 
         self.session_manager.add_session(new_activity)
         self.storage.save_all(self.session_manager.sessions)
@@ -129,6 +143,8 @@ class App:
         print(f"Продолжительность: ------------------- {new_activity.duration}")
 
         self.current_session_start = None
+        self.end_time = None
+        self.total_elapsed_seconds = None
         self.activity_name_var.set("")
 
 

@@ -17,8 +17,7 @@ class JsonStorage:
 
     def load_all(self) -> list:
         try:
-            with open(self.filename, 'r', encoding = 'utf = 8') as f:
-                print(f)
+            with open(self.filename, 'r', encoding = 'utf - 8') as f:
                 return json.load(f)
         except FileNotFoundError:
             return []
